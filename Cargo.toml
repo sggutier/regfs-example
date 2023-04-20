@@ -1,0 +1,23 @@
+# cargo-features = ["try_trait_v2"]
+
+[package]
+name = "regfs"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "*"
+env_logger = "*"
+log = "*"
+winreg = "*"
+
+[dependencies.winapi]
+branch = "projectedfslib"
+features = ["projectedfslib", "fileapi", "winerror", "combaseapi", "handleapi", "errhandlingapi", "impl-default", "impl-debug", "winbase", "minwindef", "winnt"]
+git = "http://github.com/fanzeyi/winapi-rs.git"
+
+[dependencies.prjfs]
+branch = "delete_experimental_features"
+git = "http://github.com/sggutier/prjfs-rs.git"
