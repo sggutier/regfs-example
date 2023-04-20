@@ -3,6 +3,7 @@ use log::{info, warn};
 use prjfs::conv::{RawWStrExt, WStrExt};
 use prjfs::guid::guid_to_bytes;
 use prjfs::ProviderT;
+use prjfs::sys::PRJ_EXT_INFO_TYPE_SYMLINK;
 use std::{collections::HashMap, ffi::OsString, sync::Mutex};
 use winapi::{
     shared::{
@@ -46,7 +47,25 @@ impl RegFs {
 }
 
 impl RegFs {
-    fn write_placeholder_info(&self, filepath: LPCWSTR, info: PRJ_PLACEHOLDER_INFO) -> HRESULT {
+    fn write_placeholder_info(&self, filepath: LPCWSTR, mut info: PRJ_PLACEHOLDER_INFO) -> HRESULT {
+        if filepath.to_os().to_string_lossy().ends_with("bruh") {
+            info!(target: "placeholder", "about to do something dangerous");
+            return unsafe {
+                let target_name = "Keyboard".encode_utf16().collect::<Vec<u16>>();
+                info.FileBasicInfo.FileSize = 0;
+                info.FileBasicInfo.IsDirectory = true as u8;
+                let mut extended_info = prjfs::sys::PRJ_EXTENDED_INFO::default();
+                extended_info.InfoType = PRJ_EXT_INFO_TYPE_SYMLINK;
+                extended_info.Symlink.Symlink_mut().TargetName = target_name.as_ptr();
+                prjfs::sys::PrjWritePlaceholderInfo2(
+                    self.context,
+                    filepath,
+                    &info,
+                    std::mem::size_of_val(&info) as u32,
+                    &extended_info,
+                )
+            };
+        }
         unsafe {
             prjfs::sys::PrjWritePlaceholderInfo(
                 self.context,
@@ -205,8 +224,9 @@ impl ProviderT for RegFs {
     }
 
     fn get_placeholder_info(&self, data: &PRJ_CALLBACK_DATA) -> Result<HRESULT> {
-        let path = data.FilePathName.to_os();
+        let path = data.FilePathName.to_os();        
         info!(
+            target: "placeholder",
             "----> get_placeholder_info: Path [{:?}] triggered by {:?}]",
             path,
             data.TriggeringProcessImageFileName.to_os()
@@ -235,7 +255,7 @@ impl ProviderT for RegFs {
 
         let result = self.write_placeholder_info(data.FilePathName, placeholder);
 
-        info!("<---- get_placeholder_info: {:08x}", result);
+        info!(target: "placeholder", "<---- get_placeholder_info: {:08x}", result);
 
         Ok(result)
     }
