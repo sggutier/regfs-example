@@ -51,7 +51,7 @@ impl RegFs {
         if filepath.to_os().to_string_lossy().ends_with("bruh") {
             info!(target: "placeholder", "about to do something dangerous");
             return unsafe {
-                let target_name = "Keyboard".encode_utf16().collect::<Vec<u16>>();
+                let target_name = "Keybo".encode_utf16().collect::<Vec<u16>>();
                 info.FileBasicInfo.FileSize = 0;
                 info.FileBasicInfo.IsDirectory = true as u8;
                 let mut extended_info = prjfs::sys::PRJ_EXTENDED_INFO::default();
