@@ -15,7 +15,7 @@ fn main() -> Result<()> {
     );
     let regfs: Box<dyn ProviderT> = Box::new(RegFs::new());
 
-    let _provider = Provider::new("./test".into(), options, regfs)?;
+    let _provider = Provider::new("../test".into(), options, regfs)?;
 
     loop {}
 }
